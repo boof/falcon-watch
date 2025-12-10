@@ -1,0 +1,7 @@
+#!/usr/bin/env ruby
+
+require "bundler/setup"
+
+Bundler.require
+
+Falcon.watch url: "http://[::]:3000"
