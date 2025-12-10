@@ -1,7 +1,7 @@
 #!/usr/bin/env ruby
 
 require "bundler/setup"
-
 Bundler.require
 
+require_relative "../lib/falcon/watch"
 Falcon.watch url: "http://[::]:3000"
