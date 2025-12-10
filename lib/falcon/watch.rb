@@ -19,15 +19,21 @@ module Falcon
       raise "File `config.ru' couldn't be found.`" unless File.readable? File.join(root, "config.ru")
 
       ctrl = Controller.new(...)
-      restart = ctrl.method(&:restart)
+      handler = ->(*) do
+        ctrl.restart
+      rescue StandardError => e
+        warn e.message
+      end
 
       notifier = INotify::Notifier.new
       %w[config.ru Gemfile.lock].each do |path|
-        notifier.watch(File.join(root, path), :modify, restart)
+        notifier.watch(File.join(root, path), :modify, &handler)
       end
 
       ctrl.start
       notifier.run
+    rescue Interrupt, SystemExit
+      # stop server gracefully
     ensure
       ctrl.stop if ctrl&.running?
     end
@@ -49,16 +55,16 @@ module Falcon
       def self.info(*methods)
         type = self.name
         methods.each do |method|
-          m = instance_method method
-          define_method(method) do |*args, **opts, &block|
+          implementation = instance_method method
+          define_method(method) do
             time = Time.now
             from = caller_locations(1,1)[0].label
 
-            message = format("@%<time>s %<pid>i ::%<type>s#%<method>s(%<arguments>p) from %<from>s",
-              time: time.iso8601, pid: Process.pid, type:, method:, arguments: [args, opts, block], from:)
+            message = format("@%<time>s %<pid>i ::%<type>s#%<method>s(...) from %<from>s",
+              time: time.iso8601, pid: Process.pid, type:, method:, from:)
             puts message
 
-            m.bind_call self, *args, **opts, &block
+            implementation.bind_call self
           end
         end
       end
