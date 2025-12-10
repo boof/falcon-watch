@@ -8,7 +8,7 @@ Gem::Specification.new do |spec|
   spec.authors = ["Florian Aßmann"]
   spec.email = ["florian.assmann@email.de"]
 
-  spec.summary = "Self restarting Falcon HTTP server."
+  spec.summary = "Starts and restarts a Socketry's HTTP server Falcon on config change."
   spec.description = <<~MARKDOWN
 # falcon-watch
 
