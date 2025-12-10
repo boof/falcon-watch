@@ -52,23 +52,6 @@ module Falcon
         Async::Service::Environment.new(Environment).with(**)
       end
 
-      def self.info(*methods)
-        type = self.name
-        methods.each do |method|
-          implementation = instance_method method
-          define_method(method) do
-            time = Time.now
-            from = caller_locations(1,1)[0].label
-
-            message = format("@%<time>s %<pid>i ::%<type>s#%<method>s(...) from %<from>s",
-              time: time.iso8601, pid: Process.pid, type:, method:, from:)
-            puts message
-
-            implementation.bind_call self
-          end
-        end
-      end
-
       def initialize(**options)
         options[:root] ||= Dir.pwd
         options[:name] ||= "falcon"
@@ -85,15 +68,15 @@ module Falcon
 
       def running? = @controller.running?
 
-      info def start
+      def start
         @controller.start
       end
 
-      info def restart
+      def restart
         @controller.restart
       end
 
-      info def stop
+      def stop
         @controller.stop
       end
     end
